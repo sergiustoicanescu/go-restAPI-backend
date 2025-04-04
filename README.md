@@ -91,6 +91,8 @@ The API will be accessible at the port specified by the PORT environment variabl
 
 * `GET /v1/users/{id}` – Retrieve user details.
 
+* `GET /v1/users/{id}/customer` - Retrieve user's customer details
+
 * `PUT /v1/users/{id}` – Update user details.
 
 * `PATCH /v1/users/{id}/password` – Update user password.
@@ -100,6 +102,10 @@ The API will be accessible at the port specified by the PORT environment variabl
 #### Customer Endpoints:
 
 * `GET /v1/customers/{id}` – Retrieve customer details.
+
+* `GET /v1/customers/{id}/addresses` - Retrieve customer's addresses
+
+* `GET /v1/customers{id}/orders` - Retrieve customer's orders
 
 * `POST /v1/customers` – Create a new customer.
 
