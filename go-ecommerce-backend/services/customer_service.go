@@ -7,6 +7,7 @@ import (
 
 type CustomerService interface {
 	GetCustomerByID(id int) (*models.Customer, error)
+	GetCustomerByUserID(id int) (*models.Customer, error)
 	CreateCustomer(req *CustomerRequest) (*models.Customer, error)
 	UpdateCustomer(id int, req *CustomerRequest) (*models.Customer, error)
 	DeleteCustomer(id int) error
@@ -32,6 +33,10 @@ type CustomerRequest struct {
 
 func (cs *customerService) GetCustomerByID(id int) (*models.Customer, error) {
 	return cs.CustomerRepo.GetByID(id)
+}
+
+func (cs *customerService) GetCustomerByUserID(id int) (*models.Customer, error) {
+	return cs.CustomerRepo.GetByUserID(id)
 }
 
 func (cs *customerService) CreateCustomer(req *CustomerRequest) (*models.Customer, error) {

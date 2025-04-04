@@ -18,14 +18,19 @@ import (
 )
 
 type MockOrderService struct {
-	GetOrderByIDFunc func(id int) (*models.Order, error)
-	CreateOrderFunc  func(req *services.OrderRequest) (*models.Order, error)
-	UpdateOrderFunc  func(id int, req *services.OrderRequest) (*models.Order, error)
-	GetOwnerIDFunc   func(id int) (int, error)
+	GetOrderByIDFunc          func(id int) (*models.Order, error)
+	GetOrdersByCustomerIDFunc func(id int) ([]*models.Order, error)
+	CreateOrderFunc           func(req *services.OrderRequest) (*models.Order, error)
+	UpdateOrderFunc           func(id int, req *services.OrderRequest) (*models.Order, error)
+	GetOwnerIDFunc            func(id int) (int, error)
 }
 
 func (m *MockOrderService) GetOrderByID(id int) (*models.Order, error) {
 	return m.GetOrderByIDFunc(id)
+}
+
+func (m *MockOrderService) GetOrdersByCustomerID(id int) ([]*models.Order, error) {
+	return m.GetOrdersByCustomerIDFunc(id)
 }
 
 func (m *MockOrderService) CreateOrder(req *services.OrderRequest) (*models.Order, error) {
@@ -195,4 +200,52 @@ func TestOrderController_UpdateOrder_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, localExpectedOrder.ID, respOrder.ID, "Order ID should match")
 	assert.Equal(t, localExpectedOrder.Status, respOrder.Status, "Order status should match")
+}
+
+func TestOrderController_GetOrdersByCustomerID_Success(t *testing.T) {
+	order1 := &models.Order{
+		ID:         1,
+		CustomerID: 1,
+		Status:     models.OrderStatusPending,
+		OrderItems: []models.OrderItem{
+			{ID: 1, OrderID: 1, ProductID: 1, Quantity: 2},
+		},
+		CreatedAt: time.Now(),
+	}
+	order2 := &models.Order{
+		ID:         2,
+		CustomerID: 1,
+		Status:     models.OrderStatusPending,
+		OrderItems: []models.OrderItem{
+			{ID: 2, OrderID: 2, ProductID: 2, Quantity: 1},
+		},
+		CreatedAt: time.Now(),
+	}
+	expectedOrders := []*models.Order{order1, order2}
+
+	mockService := &MockOrderService{
+		GetOrdersByCustomerIDFunc: func(id int) ([]*models.Order, error) {
+			if id == 1 {
+				return expectedOrders, nil
+			}
+			return nil, errors.New("customer not found")
+		},
+	}
+
+	orderController := controllers.NewOrderController(mockService)
+
+	req := httptest.NewRequest("GET", "/customers/1/orders", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "1"})
+	rr := httptest.NewRecorder()
+
+	orderController.GetOrdersByCustomerID(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code, "Expected status code 200 for successful orders retrieval")
+
+	var respOrders []*models.Order
+	err := json.NewDecoder(rr.Body).Decode(&respOrders)
+	assert.NoError(t, err, "Expected valid JSON response")
+	assert.Equal(t, len(expectedOrders), len(respOrders), "Expected orders count to match")
+	assert.Equal(t, expectedOrders[0].ID, respOrders[0].ID, "Order ID should match for the first order")
+	assert.Equal(t, expectedOrders[1].ID, respOrders[1].ID, "Order ID should match for the second order")
 }

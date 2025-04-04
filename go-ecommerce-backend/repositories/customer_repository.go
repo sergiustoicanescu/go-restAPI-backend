@@ -9,6 +9,7 @@ import (
 type CustomerRepository interface {
 	Create(customer *models.Customer) error
 	GetByID(id int) (*models.Customer, error)
+	GetByUserID(id int) (*models.Customer, error)
 	Update(customer *models.Customer) error
 	Delete(id int) error
 }
@@ -29,6 +30,16 @@ func (cr *customerRepository) Create(customer *models.Customer) error {
 func (cr *customerRepository) GetByID(id int) (*models.Customer, error) {
 	customer := &models.Customer{}
 	query := "SELECT id, user_id, first_name, last_name, phone_number FROM customers WHERE id = $1"
+	err := cr.DB.QueryRow(query, id).Scan(&customer.ID, &customer.UserID, &customer.FirstName, &customer.LastName, &customer.PhoneNumber)
+	if err != nil {
+		return nil, err
+	}
+	return customer, nil
+}
+
+func (cr *customerRepository) GetByUserID(id int) (*models.Customer, error) {
+	customer := &models.Customer{}
+	query := "SELECT id, user_id, first_name, last_name, phone_number FROM customers WHERE user_id = $1"
 	err := cr.DB.QueryRow(query, id).Scan(&customer.ID, &customer.UserID, &customer.FirstName, &customer.LastName, &customer.PhoneNumber)
 	if err != nil {
 		return nil, err

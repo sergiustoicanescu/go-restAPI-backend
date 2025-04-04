@@ -35,6 +35,22 @@ func (cc *CustomerController) GetCustomer(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(customer)
 }
 
+func (cc *CustomerController) GetCustomerByUserID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	customer, err := cc.CustomerService.GetCustomerByUserID(id)
+	if err != nil {
+		http.Error(w, "Customer not found", http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode(customer)
+}
+
 func (cc *CustomerController) CreateCustomer(w http.ResponseWriter, r *http.Request, req *services.CustomerRequest) {
 	customer, err := cc.CustomerService.CreateCustomer(req)
 	if err != nil {

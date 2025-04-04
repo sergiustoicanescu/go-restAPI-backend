@@ -35,6 +35,22 @@ func (oc *OrderController) GetOrder(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(order)
 }
 
+func (oc *OrderController) GetOrdersByCustomerID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid customer ID", http.StatusBadRequest)
+		return
+	}
+
+	order, err := oc.OrderService.GetOrdersByCustomerID(id)
+	if err != nil {
+		http.Error(w, "Orders for customer not found", http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode(order)
+}
+
 func (oc *OrderController) CreateOrder(w http.ResponseWriter, r *http.Request, req *services.OrderRequest) {
 	order, err := oc.OrderService.CreateOrder(req)
 	if err != nil {

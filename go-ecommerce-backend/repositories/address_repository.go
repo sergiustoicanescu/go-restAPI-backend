@@ -9,6 +9,7 @@ import (
 type AddressRepository interface {
 	Create(address *models.Address) error
 	GetByID(id int) (*models.Address, error)
+	GetByCustomerID(id int) ([]*models.Address, error)
 	Update(address *models.Address) error
 	Delete(id int) error
 	GetOwnerID(id int) (int, error)
@@ -35,6 +36,25 @@ func (ar *addressRepository) GetByID(id int) (*models.Address, error) {
 		return nil, err
 	}
 	return address, nil
+}
+
+func (ar *addressRepository) GetByCustomerID(id int) ([]*models.Address, error) {
+	query := "SELECT id, customer_id, street_address, city, country FROM addresses WHERE customer_id = $1"
+	rows, err := ar.DB.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var addresses []*models.Address
+	for rows.Next() {
+		var address = new(models.Address)
+		if err := rows.Scan(&address.ID, &address.CustomerID, &address.StreetAddress, &address.City, &address.Country); err != nil {
+			return nil, err
+		}
+		addresses = append(addresses, address)
+	}
+	return addresses, nil
 }
 
 func (ar *addressRepository) Update(address *models.Address) error {

@@ -7,6 +7,7 @@ import (
 
 type AddressService interface {
 	GetAddressByID(id int) (*models.Address, error)
+	GetAddressesByCustomerID(id int) ([]*models.Address, error)
 	CreateAddress(req *AddressRequest) (*models.Address, error)
 	UpdateAddress(id int, req *AddressRequest) (*models.Address, error)
 	DeleteAddress(id int) error
@@ -32,6 +33,10 @@ type AddressRequest struct {
 
 func (as *addressService) GetAddressByID(id int) (*models.Address, error) {
 	return as.AddressRepo.GetByID(id)
+}
+
+func (as *addressService) GetAddressesByCustomerID(id int) ([]*models.Address, error) {
+	return as.AddressRepo.GetByCustomerID(id)
 }
 
 func (as *addressService) CreateAddress(req *AddressRequest) (*models.Address, error) {

@@ -33,6 +33,20 @@ func (ac *AddressController) GetAddress(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(address)
 }
 
+func (ac *AddressController) GetAddressesByCustomerID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid customer ID", http.StatusBadRequest)
+		return
+	}
+	addresses, err := ac.AddressService.GetAddressesByCustomerID(id)
+	if err != nil {
+		http.Error(w, "Addresses for customer not found", http.StatusNotFound)
+	}
+	json.NewEncoder(w).Encode(addresses)
+}
+
 func (ac *AddressController) CreateAddress(w http.ResponseWriter, r *http.Request, req *services.AddressRequest) {
 	address, err := ac.AddressService.CreateAddress(req)
 

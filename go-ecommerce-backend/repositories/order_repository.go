@@ -10,6 +10,7 @@ import (
 type OrderRepository interface {
 	Create(order *models.Order) error
 	GetByID(id int) (*models.Order, error)
+	GetOrdersByCustomerID(id int) ([]*models.Order, error)
 	Update(order *models.Order) error
 	GetOwnerID(id int) (int, error)
 }
@@ -94,11 +95,32 @@ func (or *orderRepository) GetByID(id int) (*models.Order, error) {
 		if err != nil {
 			return nil, err
 		}
+		item.OrderID = order.ID
 		orderItems = append(orderItems, item)
 	}
 	order.OrderItems = orderItems
 
 	return order, nil
+}
+
+func (or *orderRepository) GetOrdersByCustomerID(id int) ([]*models.Order, error) {
+	query := "SELECT id, customer_id, status, created_at FROM orders WHERE customer_id = $1"
+	rows, err := or.DB.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var orders []*models.Order
+	for rows.Next() {
+		var order = new(models.Order)
+		if err := rows.Scan(&order.ID, &order.CustomerID, &order.Status, &order.CreatedAt); err != nil {
+			return nil, err
+		}
+		orders = append(orders, order)
+	}
+
+	return orders, nil
 }
 
 func (or *orderRepository) Update(order *models.Order) error {

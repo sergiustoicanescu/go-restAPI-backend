@@ -7,6 +7,7 @@ import (
 
 type OrderService interface {
 	GetOrderByID(id int) (*models.Order, error)
+	GetOrdersByCustomerID(id int) ([]*models.Order, error)
 	CreateOrder(req *OrderRequest) (*models.Order, error)
 	UpdateOrder(id int, req *OrderRequest) (*models.Order, error)
 	GetOwnerID(id int) (int, error)
@@ -35,6 +36,10 @@ type OrderItemRequest struct {
 
 func (os *orderService) GetOrderByID(id int) (*models.Order, error) {
 	return os.OrderRepo.GetByID(id)
+}
+
+func (os *orderService) GetOrdersByCustomerID(id int) ([]*models.Order, error) {
+	return os.OrderRepo.GetOrdersByCustomerID(id)
 }
 
 func (os *orderService) CreateOrder(req *OrderRequest) (*models.Order, error) {
